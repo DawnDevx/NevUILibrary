@@ -1,6 +1,103 @@
-local Library = {}
+local Nev = {}
 
-function Library:CreateLoginWindow(HubName, LoginList)
+local Tween = game:GetService("TweenService")
+local Tweeninfo = TweenInfo.new
+local input = game:GetService("UserInputService")
+local Run = game:GetService("RunService")
+
+local Utility = {}
+local Objects = {}
+function Nev:DraggingEnabled(Frame, Parent)
+	
+	Parent = Parent or Frame
+	
+	local Dragging = false
+	local DragInput, MousePos, FramePos
+	
+	Frame.InputBegan:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 then
+			Dragging = true
+			MousePos = input.Position
+			FramePos = Parent.Position
+			
+			input.Changed:Connect(function()
+				if input.UserInputState == Enum.UserInputState.End then
+					Dragging = false
+				end
+			end)
+		end
+	end)
+	
+	Frame.InputChanged:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseMovement then
+			DragInput = input
+		end
+	end)
+	
+	input.InputChanged:Connect(function(input)
+		if input == DragInput and Dragging then
+			local Delta = input.Position - MousePos
+			Parent.Position = UDim2.new(FramePos.X.Scale, FramePos.X.Offset + Delta.X, FramePos.Y.Scale, FramePos.Y.Offset + Delta.Y)
+		end
+	end)
+end
+
+function Utility:TweenObject(obj, properties, duration, ...)
+	Tween:Create(obj, Tweeninfo(duration, ...), properties):Play()
+end
+
+local Themes = {
+	
+}
+local ThemeStyles = {
+	ThemeName = {
+		
+	}
+}
+local oldTheme = ""
+
+local SettingsT = {
+	
+}
+
+local Name = "NevConfig.JSON"
+
+pcall(function()
+
+	if not pcall(function() readfile(Name) end) then
+		writefile(Name, game:service'HttpService':JSONEncode(SettingsT))
+	end
+
+	Settings = game:service'HttpService':JSONEncode(readfile(Name))
+end)
+
+local LibName = tostring(math.random(1, 100))..tostring(math.random(1,50))..tostring(math.random(1, 100))
+
+function Nev:ToggleUI()
+	if game.CoreGui[LibName].Enabled then
+		game.CoreGui[LibName].Enabled = false
+	else
+		game.CoreGui[LibName].Enabled = true
+	end
+end
+
+function Nev.CreateWindow(NevName, ThemeList)
+	if not ThemeList then
+		ThemeList = Themes
+	end
+	if ThemeList == "ThemeName" then
+		ThemeList = ThemeStyles.ThemeName
+	end
+	
+	ThemeList = ThemeList or {}
+	local SelectedTab
+	NevName = NevName or "Library"
+	table.insert(Nev, NevName)
+	for i,v in pairs(game.CoreGui:GetChildren()) do
+		if v:IsA("ScreenGui") and v.Name == NevName then
+			v:Destroy()
+		end
+	end
 	local DesignNev = Instance.new("ScreenGui")
 	local NevLogin = Instance.new("Frame")
 	local Top = Instance.new("Frame")
@@ -14,11 +111,12 @@ function Library:CreateLoginWindow(HubName, LoginList)
 	local LoginBtn = Instance.new("TextButton")
 	local Credits = Instance.new("TextLabel")
 
-	--Properties:
+	Nev:DraggingEnabled(Top, NevLogin)
 
-	DesignNev.Name = "DesignNev"
-	DesignNev.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+	DesignNev.Name = LibName
+	DesignNev.Parent = game.CoreGui
 	DesignNev.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+	DesignNev.ResetOnSpawn = false
 
 	NevLogin.Name = "NevLogin"
 	NevLogin.Parent = DesignNev
@@ -39,7 +137,7 @@ function Library:CreateLoginWindow(HubName, LoginList)
 	Name.BackgroundTransparency = 1.000
 	Name.Size = UDim2.new(1, 0, 1, 0)
 	Name.Font = Enum.Font.SourceSansLight
-	Name.Text = HubName.." - Login"
+	Name.Text = NevName.." - Login"
 	Name.TextColor3 = Color3.fromRGB(255, 255, 255)
 	Name.TextScaled = true
 	Name.TextSize = 14.000
@@ -163,7 +261,6 @@ function Library:CreateLoginWindow(HubName, LoginList)
 		end)
 	end
 	coroutine.wrap(FVCVPMU_fake_script)()
-
 end
 
-return Library
+return Nev
