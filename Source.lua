@@ -135,7 +135,7 @@ function Nev:CreateWindow(NevName, ThemeList)
 	
 	Nev:DraggingEnabled(MainHeader, Main)
 	
-	ScreenGui.Parnet = game.CoreGui
+	ScreenGui.Parnet = game.Players.LocalPlayer:WaitForChild('PlayerGui')
 	ScreenGui.Name = LibName
 	ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 	ScreenGui.ResetOnSpawn = false
